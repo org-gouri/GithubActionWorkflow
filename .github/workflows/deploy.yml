@@ -22,27 +22,11 @@ jobs:
 
       - name: Configure Kubeconfig
         run: |
-          mkdir -p $HOME/.kube
-          cat <<EOF > $HOME/.kube/config
-          apiVersion: v1
-          kind: Config
-          clusters:
-          - name: minikube
-            cluster:
-              server: ${{ secrets.KUBE_API_SERVER }}
-              certificate-authority-data: ${{ secrets.KUBE_CA_CERT }}
-          users:
-          - name: minikube-user
-            user:
-              client-certificate-data: ${{ secrets.KUBE_CLIENT_CERT }}
-              client-key-data: ${{ secrets.KUBE_CLIENT_KEY }}
-          contexts:
-          - name: minikube
-            context:
-              cluster: minikube
-              user: minikube-user
-          current-context: minikube
-          EOF
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify Cluster Connection
+        run: kubectl get nodes
 
       - name: Deploy to Minikube
         run: |
